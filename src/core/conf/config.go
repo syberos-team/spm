@@ -90,7 +90,7 @@ func (c *configInfo) mkSpmConf() error{
 		return err
 	}
 	defer util.CloseQuietly(file)
-	if data, err := json.MarshalIndent(c, "", "\t"); err==nil {
+	if data, err := util.ToPrettyJSON(*c); err==nil {
 		_, err := file.Write(data)
 		return err
 	}else{

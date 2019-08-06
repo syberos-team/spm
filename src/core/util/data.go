@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -49,4 +50,32 @@ func Prompt(prompt string, defaultValue string) chan string{
 		replyChannel <- defaultValue
 	}
 	return replyChannel
+}
+
+//ToPrettyJSON 生成json字符串并格式化
+func ToPrettyJSON(v interface{}) ([]byte, error){
+	return json.MarshalIndent(v, "", "\t")
+}
+
+//LoadJsonFile 加载json文件内容转成struct
+func LoadJsonFile(filePath string, data *interface{}) error{
+	file, err := os.Open(filePath)
+	if err!=nil {
+		return nil
+	}
+	defer CloseQuietly(file)
+	bytes, err := ioutil.ReadAll(file)
+	err = json.Unmarshal(bytes, data)
+	if err!=nil {
+		return err
+	}
+	return nil
+}
+
+func WriteStruct(filePath string, data interface{}) error{
+	bytes, err := ToPrettyJSON(data)
+	if err!=nil {
+		return err
+	}
+	return ioutil.WriteFile(filePath, bytes, os.FileMode(0666))
 }

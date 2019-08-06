@@ -3,39 +3,31 @@ package commands
 import (
 	"core/conf"
 	"core/util"
-	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"flag"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-//pwd 当前所在目录
-var pwd string
-
-func init(){
-	path, err := util.Pwd()
-	if err!=nil {
-		panic(err)
-	}
-	pwd = path
-}
-
-
+const spmJsonFilename = "spm.json"
+//InitCommand 创建项目
 type InitCommand struct {
 	Command
 	spmJson *conf.SpmJson
 }
 
-func (i InitCommand) Description() string {
+func (i *InitCommand) RegisterFlags(flags *flag.FlagSet) {
+}
+
+func (i *InitCommand) Description() string {
 	return "Initializes a new module in the current directory"
 }
 
-func (i InitCommand) Run() error {
-	//if err := i.check(); err!=nil {
-	//	return err
-	//}
+func (i *InitCommand) Run() error {
+	if err := i.check(); err!=nil {
+		return err
+	}
 	cwd := filepath.Base(pwd)
 
 	i.spmJson = conf.NewSpmJson()
@@ -66,12 +58,13 @@ func (i InitCommand) Run() error {
 	if err := i.generateBoilerplate(); err!=nil {
 		return err
 	}
+	i.Info("Initialized module ", i.spmJson.Name)
 	return nil
 }
 
 
 
-func (i InitCommand) extractReverseDomain(email string) string {
+func (i *InitCommand) extractReverseDomain(email string) string {
 	emailParts := strings.Split(email, "@")
 	if len(emailParts) != 2 {
 		return ""
@@ -83,12 +76,12 @@ func (i InitCommand) extractReverseDomain(email string) string {
 	return strings.Join(domainParts, ".")
 }
 
-func (i InitCommand) recommendPriFilename(name string) string{
+func (i *InitCommand) recommendPriFilename(name string) string{
 	return strings.ReplaceAll(name, ".", "_") + ".pri"
 }
 
 //check 检查当前所在目录必须是空目录
-func (i InitCommand) check() error{
+func (i *InitCommand) check() error{
 	f, err := os.Open(pwd)
 	if err!=nil {
 		return err
@@ -101,11 +94,8 @@ func (i InitCommand) check() error{
 	return nil
 }
 
-func (i InitCommand) generateBoilerplate() error{
+func (i *InitCommand) generateBoilerplate() error{
 	subDir := strings.ReplaceAll(i.spmJson.Name, ".", "/")
-	if err := os.MkdirAll(subDir, os.ModePerm); err!=nil {
-		return err
-	}
 	prefixName := filepath.Base(i.spmJson.PriFilename)
 	model := &util.TemplateModel{
 		QrcFile:   prefixName + ".qrc",
@@ -127,12 +117,8 @@ func (i InitCommand) generateBoilerplate() error{
 	return nil
 }
 
-func (i InitCommand) generateSpmJson() error{
-	data, err := json.MarshalIndent(i.spmJson, "", "\t")
-	if err!=nil {
-		return err
-	}
-	return ioutil.WriteFile(filepath.Join(pwd, "spm.json"), data, os.FileMode(0666))
+func (i *InitCommand) generateSpmJson() error{
+	return util.WriteStruct(filepath.Join(pwd, spmJsonFilename), i.spmJson)
 }
 
 

@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 
@@ -39,6 +40,16 @@ func Post(url string, params *map[string][]string, data *interface{}) error{
 	err = getJson(resp, data)
 	return err
 }
+
+func PostJSON(url, params string, data *interface{}) error{
+	resp, err := http.Post(url, "application/json", strings.NewReader(params))
+	if err!=nil {
+		return err
+	}
+	err = getJson(resp, data)
+	return err
+}
+
 
 func GetDownload(url string, writer io.Writer) (size int64, err error){
 	resp, err := http.Get(url)

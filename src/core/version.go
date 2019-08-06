@@ -10,7 +10,6 @@ import (
 const SEP string = "."
 
 type CheckVersionResponse struct {
-	ApiRespBase
 	version string
 }
 

@@ -20,6 +20,16 @@ RESOURCES += \
 	QmldirTemplate = template.Must(template.New("qmldir").Parse(`
 module {{.Name}}
 `))
+	VendorTemplate = template.Must(template.New("vendorPri").Parse(`
+INCLUDEPATH += $$PWD
+QML_IMPORT_PATH += $$PWD
+
+{{- with .Dependencies}}
+	{{range $index, $dependency := . }}
+include($$PWD/{{$dependency}}.pri)
+	{{end}}
+{{end}}
+`))
 )
 
 type TemplateModel struct {

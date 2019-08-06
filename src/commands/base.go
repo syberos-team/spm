@@ -1,6 +1,10 @@
 package commands
 
-import "log"
+import (
+	"core/util"
+	"flag"
+	"log"
+)
 
 type Command struct {
 	Log *log.Logger
@@ -21,6 +25,18 @@ func (c Command) Error(msg ...string){
 type Commander interface {
 	Description() string
 	Run() error
+	RegisterFlags(flags *flag.FlagSet)
+}
+
+//pwd 当前所在目录
+var pwd string
+
+func init(){
+	path, err := util.Pwd()
+	if err!=nil {
+		panic(err)
+	}
+	pwd = path
 }
 
 

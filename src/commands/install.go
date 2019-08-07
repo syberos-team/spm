@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"core/util"
 	"errors"
-	"flag"
 	"io"
 	"io/ioutil"
 	"os"
@@ -87,22 +86,11 @@ func (i *InstallCommand) Run() error {
 	return nil
 }
 
-func (i *InstallCommand) RegisterFlags(flags *flag.FlagSet) {
-	arg := flags.Arg(0)
-	if arg=="" {
+func (i *InstallCommand) RegisterArgs(args ...string) {
+	if args==nil || len(args)==0 {
 		return
 	}
-	packageInfo := strings.Split(arg, "@")
-	if packageInfo==nil || len(packageInfo)==0{
-		return
-	}
-	packageInfoLen := len(packageInfo)
-	if packageInfoLen==1{
-		i.packageName = packageInfo[0]
-	}else if packageInfoLen==2 {
-		i.packageName = packageInfo[0]
-		i.version = packageInfo[1]
-	}
+	i.packageName, i.version = util.ParsePackageInfo(args[0])
 }
 
 func (i *InstallCommand) downloadFromGit(url, path string) error{

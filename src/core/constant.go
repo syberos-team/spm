@@ -1,8 +1,6 @@
 package core
 
-//当前版本
 const (
-	VERSION string = "1.0.0"
 	FILENAME string = "spm"
 )
 

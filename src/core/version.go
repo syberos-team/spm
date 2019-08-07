@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-const SEP string = "."
+//当前版本号
+const VERSION = "1.0.0"
+
 
 type CheckVersionResponse struct {
 	version string
@@ -69,7 +71,7 @@ func Upgrade() error{
 
 //Parse 解析版本号字符串
 func Parse(ver string) (*Version, error){
-	verNums := strings.Split(ver, SEP)
+	verNums := strings.Split(ver, ".")
 	if verNums==nil || len(verNums) != 3 {
 		return nil, errors.New("version number format error")
 	}

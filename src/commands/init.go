@@ -5,7 +5,6 @@ import (
 	"core/log"
 	"core/util"
 	"errors"
-	"flag"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +16,7 @@ type InitCommand struct {
 	spmJson *conf.SpmJson
 }
 
-func (i *InitCommand) RegisterFlags(flags *flag.FlagSet) {
+func (i *InitCommand) RegisterArgs(args ...string) {
 }
 
 func (i *InitCommand) Description() string {

@@ -19,7 +19,7 @@ func (h HelpCommand) Run() error {
 	return nil
 }
 
-func (h HelpCommand) RegisterFlags(flags *flag.FlagSet) {
+func (h HelpCommand) RegisterArgs(args ...string) {
 }
 
 func NewHelpCommand() *HelpCommand {

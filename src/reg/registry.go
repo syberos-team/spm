@@ -27,7 +27,7 @@ func (r *Registry) RunCommand(){
 	for name, run := range r.commandRun {
 		if *run {
 			cmd := r.commandImpl[name]
-			cmd.RegisterFlags(flag.NewFlagSet(os.Args[0], flag.ExitOnError))
+			cmd.RegisterArgs(os.Args[2:]...)
 			err := cmd.Run()
 			if err!=nil {
 				log.Error(err.Error())

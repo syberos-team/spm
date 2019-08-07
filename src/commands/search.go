@@ -4,7 +4,6 @@ import (
 	"core"
 	"core/log"
 	"errors"
-	"flag"
 	"fmt"
 	"golang.org/x/crypto/ssh/terminal"
 	"strings"
@@ -17,8 +16,11 @@ type SearchCommand struct {
 	packageName string
 }
 
-func (s *SearchCommand) RegisterFlags(flags *flag.FlagSet) {
-	s.packageName = flags.Arg(0)
+func (s *SearchCommand) RegisterArgs(args ...string) {
+	if args==nil || len(args)==0 {
+		return
+	}
+	s.packageName = args[0]
 }
 
 func (s *SearchCommand) Description() string {

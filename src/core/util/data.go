@@ -3,6 +3,7 @@ package util
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -59,6 +60,9 @@ func ToPrettyJSON(v interface{}) ([]byte, error){
 
 //LoadJsonFile 加载json文件内容转成struct
 func LoadJsonFile(filePath string, data *interface{}) error{
+	if !IsExists(filePath) {
+		return errors.New("is not exists: " + filePath)
+	}
 	file, err := os.Open(filePath)
 	if err!=nil {
 		return err
@@ -74,6 +78,9 @@ func LoadJsonFile(filePath string, data *interface{}) error{
 
 //LoadTextFile 加载文本类型的文件
 func LoadTextFile(filePath string) (string, error){
+	if !IsExists(filePath) {
+		return "", errors.New("is not exists: " + filePath)
+	}
 	bytes, err := ioutil.ReadFile(filePath)
 	if err!=nil {
 		return "", err
@@ -81,10 +88,27 @@ func LoadTextFile(filePath string) (string, error){
 	return string(bytes), nil
 }
 
+//WriteStruct 将结构体转换成json格式字符串并写入文件
 func WriteStruct(filePath string, data interface{}) error{
 	bytes, err := ToPrettyJSON(data)
 	if err!=nil {
 		return err
 	}
 	return ioutil.WriteFile(filePath, bytes, os.FileMode(0666))
+}
+
+//ParsePackageInfo 解析包信息，拆分成包名和版本号
+func ParsePackageInfo(pkgInfo string) (packageName, version string){
+	packageInfo := strings.Split(pkgInfo, "@")
+	if packageInfo==nil || len(packageInfo)==0{
+		return
+	}
+	packageInfoLen := len(packageInfo)
+	if packageInfoLen==1{
+		packageName = packageInfo[0]
+	}else if packageInfoLen==2 {
+		packageName = packageInfo[0]
+		version = packageInfo[1]
+	}
+	return
 }

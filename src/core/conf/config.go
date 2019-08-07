@@ -1,9 +1,8 @@
 package conf
 
 import (
+	"core/log"
 	"core/util"
-	"encoding/json"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
@@ -17,48 +16,59 @@ const (
 
 var Config configInfo
 
-type configInfo struct {
-	Url string `json:"url"`
-	configPath string
-}
-
 func init(){
-	Config = configInfo{}
+	Config = configInfo{
+		Url: ServerUrl,
+		Log: logInfo{
+			Level:log.LogInfoString,
+		},
+	}
 	Config.load()
+	//设置日志级别
+	log.SetLogLevelString(Config.Log.Level)
 }
 
+//日志配置信息
+type logInfo struct {
+	//日志级别
+	Level string `json:"level"`
+}
+
+//配置信息
+type configInfo struct {
+	//服务器路径
+	Url string `json:"url"`
+	//日志
+	Log logInfo `json:"log"`
+
+	configFilePath string	//配置文件所在路径
+}
+
+//load 尝试从用户目录下加载spm.conf文件，若文件不存在，将会尝试创建，并使用默认配置
 func (c *configInfo) load(){
-	configPath, err := c.spmPath(ConfigFilename)
-	c.configPath = configPath
+	configFilePath, err := c.spmPath(ConfigFilename)
+	c.configFilePath = configFilePath
 	if err!=nil {
-		panic(err.Error())
-	}
-	if !util.IsExists(configPath) {
-		c.Url = ServerUrl
+		log.Warning(err.Error())
 		return
 	}
-	err = c.readConfig(configPath)
+	err = c.createSpmConf()
 	if err!=nil {
+		log.Error(err.Error())
+		panic("failed to create spm.conf file")
+	}
+	err = c.readConfig(configFilePath)
+	if err!=nil {
+		log.Error(err.Error())
 		panic("failed to read spm.conf file")
 	}
 }
 
 
+//读取配置文件信息
 func (c *configInfo) readConfig(configPath string) error {
-	file, err := os.Open(configPath)
-	if err !=nil {
-		return err
-	}
-	defer util.CloseQuietly(file)
-	content, err := ioutil.ReadAll(file)
-	if err!=nil{
-		return err
-	}
-	err = json.Unmarshal(content, c)
-	if err!=nil {
-		return err
-	}
-	return nil
+	var data interface{} = c
+	return util.LoadJsonFile(configPath, &data)
 }
 
 //spmPath 获取.spm目录下的子路径
@@ -76,26 +86,16 @@ func (c *configInfo) spmPath(sub ...string) (string, error){
 	}
 }
 
-func (c *configInfo) mkSpmConf() error{
-	if util.IsExists(c.configPath) {
+//创建spm.conf文件
+func (c *configInfo) createSpmConf() error{
+	if util.IsExists(c.configFilePath) {
 		return nil
 	}
-	if err := os.MkdirAll(path.Dir(c.configPath), os.ModePerm); err!=nil {
+	log.Debug("no spm.conf file found, ready to create:", c.configFilePath)
+	if err := os.MkdirAll(path.Dir(c.configFilePath), os.ModePerm); err!=nil {
 		return err
 	}
-	c.Url, _ = <-util.Prompt("server interface address:", "")
-
-	file, err := os.Create(c.configPath)
-	if err!=nil {
-		return err
-	}
-	defer util.CloseQuietly(file)
-	if data, err := util.ToPrettyJSON(*c); err==nil {
-		_, err := file.Write(data)
-		return err
-	}else{
-		return err
-	}
+	return util.WriteStruct(c.configFilePath, c)
 }
 
 

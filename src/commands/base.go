@@ -2,7 +2,6 @@ package commands
 
 import (
 	"core/util"
-	"flag"
 )
 
 const SpmJsonFilename = "spm.json"
@@ -25,7 +24,7 @@ type Command struct {
 type Commander interface {
 	Description() string
 	Run() error
-	RegisterFlags(flags *flag.FlagSet)
+	RegisterArgs(args ...string)
 }
 
 

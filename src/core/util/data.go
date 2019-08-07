@@ -61,7 +61,7 @@ func ToPrettyJSON(v interface{}) ([]byte, error){
 func LoadJsonFile(filePath string, data *interface{}) error{
 	file, err := os.Open(filePath)
 	if err!=nil {
-		return nil
+		return err
 	}
 	defer CloseQuietly(file)
 	bytes, err := ioutil.ReadAll(file)
@@ -70,6 +70,15 @@ func LoadJsonFile(filePath string, data *interface{}) error{
 		return err
 	}
 	return nil
+}
+
+//LoadTextFile 加载文本类型的文件
+func LoadTextFile(filePath string) (string, error){
+	bytes, err := ioutil.ReadFile(filePath)
+	if err!=nil {
+		return "", err
+	}
+	return string(bytes), nil
 }
 
 func WriteStruct(filePath string, data interface{}) error{

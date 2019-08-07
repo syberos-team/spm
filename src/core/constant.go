@@ -6,8 +6,6 @@ const (
 	FILENAME string = "spm"
 )
 
-
-
 const (
 	//检查新版本接口
 	API_CHECK_VERSION string = ""
@@ -23,8 +21,4 @@ const (
 	API_INFO string = "/detailsQuery"
 
 )
-
-
-
-
 

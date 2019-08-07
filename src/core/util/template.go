@@ -2,6 +2,7 @@ package util
 
 import (
 	"os"
+	"strings"
 	"text/template"
 )
 
@@ -24,18 +25,16 @@ module {{.Name}}
 INCLUDEPATH += $$PWD
 QML_IMPORT_PATH += $$PWD
 
-{{- with .Dependencies}}
-	{{range $index, $dependency := . }}
-include($$PWD/{{$dependency}}.pri)
-	{{end}}
-{{end}}
-`))
+{{- with .IncludePris}}
+{{range $index, $pri := . }}{{$pri}}
+{{end}}{{end}}`))
 )
 
 type TemplateModel struct {
 	QrcFile string
 	QrcPrefix string
 	Name string
+	IncludePris []string
 }
 
 //WriteTemplate 使用模板生成文件
@@ -51,4 +50,14 @@ func WriteTemplate(filePath string, tpl *template.Template, data TemplateModel) 
 		return err
 	}
 	return nil
+}
+
+//TemplateToString 使用模板生成字符串
+func TemplateToString(tpl *template.Template, data TemplateModel) (string, error){
+	builder := &strings.Builder{}
+	err := tpl.Execute(builder, data)
+	if err!=nil {
+		return "", err
+	}
+	return builder.String(), nil
 }

@@ -84,3 +84,7 @@ func PackageInfo(packageName, version string) (*core.InfoResponseData, error){
 	return &resp.Data, nil
 }
 
+func NewInfoCommand() *InfoCommand{
+	return &InfoCommand{}
+}
+

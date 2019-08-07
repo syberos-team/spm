@@ -2,9 +2,6 @@ package conf
 
 import (
 	"core/util"
-	"encoding/json"
-	"io/ioutil"
-	"os"
 )
 
 type SpmJson struct {
@@ -29,16 +26,8 @@ type Repository struct {
 
 //Load 加载spm.json文件信息
 func (s *SpmJson) Load(filePath string) error{
-	file, err := os.Open(filePath)
-	if err!=nil {
-		return err
-	}
-	defer util.CloseQuietly(file)
-	data, err := ioutil.ReadAll(file)
-	if err!=nil {
-		return err
-	}
-	return json.Unmarshal(data, s)
+	var data interface{} = s
+	return util.LoadJsonFile(filePath, &data)
 }
 
 func NewSpmJson() *SpmJson{

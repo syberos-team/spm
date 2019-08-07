@@ -2,6 +2,7 @@ package commands
 
 import (
 	"core"
+	"core/log"
 	"errors"
 	"flag"
 	"fmt"
@@ -51,7 +52,7 @@ const (
 
 func (s *SearchCommand) printData(results []*core.SearchResponseData) {
 	if results==nil || len(results)==0 {
-		s.Warning("No packages found")
+		log.Warning("No packages found")
 		return
 	}
 	columnWidths := map[string]int{
@@ -136,6 +137,10 @@ func (s *SearchCommand) intMin(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func NewSearchCommand() *SearchCommand{
+	return &SearchCommand{}
 }
 
 

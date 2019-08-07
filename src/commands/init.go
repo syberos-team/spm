@@ -2,6 +2,7 @@ package commands
 
 import (
 	"core/conf"
+	"core/log"
 	"core/util"
 	"errors"
 	"flag"
@@ -10,7 +11,6 @@ import (
 	"strings"
 )
 
-const spmJsonFilename = "spm.json"
 //InitCommand 创建项目
 type InitCommand struct {
 	Command
@@ -58,7 +58,7 @@ func (i *InitCommand) Run() error {
 	if err := i.generateBoilerplate(); err!=nil {
 		return err
 	}
-	i.Info("Initialized module ", i.spmJson.Name)
+	log.Info("Initialized module ", i.spmJson.Name)
 	return nil
 }
 
@@ -118,7 +118,11 @@ func (i *InitCommand) generateBoilerplate() error{
 }
 
 func (i *InitCommand) generateSpmJson() error{
-	return util.WriteStruct(filepath.Join(pwd, spmJsonFilename), i.spmJson)
+	return util.WriteStruct(filepath.Join(pwd, SpmJsonFilename), i.spmJson)
+}
+
+func NewInitCommand() *InitCommand{
+	return &InitCommand{}
 }
 
 

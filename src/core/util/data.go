@@ -69,6 +69,7 @@ func LoadJsonFile(filePath string, data *interface{}) error{
 	}
 	defer CloseQuietly(file)
 	bytes, err := ioutil.ReadAll(file)
+
 	err = json.Unmarshal(bytes, data)
 	if err!=nil {
 		return err

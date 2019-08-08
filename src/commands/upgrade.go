@@ -1,6 +1,9 @@
 package commands
 
-import "core/log"
+import (
+	"core"
+	"fmt"
+)
 
 type UpgradeCommand struct {
 	Command
@@ -11,7 +14,16 @@ func (u *UpgradeCommand) Description() string {
 }
 
 func (u *UpgradeCommand) Run() error {
-	log.Error("upgrade command unrealized")
+	versionManage := core.NewVersionManage()
+	needUpgrade, err := versionManage.CheckVersion()
+	if err!=nil {
+		return err
+	}
+	if needUpgrade {
+		return versionManage.Upgrade()
+	}
+	fmt.Println("version:", core.VERSION)
+	fmt.Println("The current version is up to date")
 	return nil
 }
 

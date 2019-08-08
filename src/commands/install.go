@@ -2,8 +2,10 @@ package commands
 
 import (
 	"bufio"
+	"core/log"
 	"core/util"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -36,14 +38,19 @@ func (i *InstallCommand) Description() string {
 }
 
 func (i *InstallCommand) Run() error {
+	log.Debug("install package:", i.packageName, i.version)
 	spmJsonContent := &SpmJsonContent{}
 
 	//检查spm.json文件中是否已存在待安装的包
 	spmJsonFilePath := path.Join(pwd, SpmJsonFilename)
 	if util.IsExists(spmJsonFilePath) {
+		log.Debug("load", spmJsonFilePath)
 		err := i.loadSpmJson(spmJsonFilePath, spmJsonContent)
 		if err!=nil {
 			return err
+		}
+		if log.IsDebug(){
+			log.Debug("spm.json:", fmt.Sprintf("%+v", spmJsonContent))
 		}
 		err = i.checkDependency(*spmJsonContent)
 		if err!=nil {
@@ -181,9 +188,19 @@ func (i *InstallCommand) updateSpmJson(spmJsonPath string, content *SpmJsonConte
 }
 
 func (i *InstallCommand) checkDependency(content SpmJsonContent) error{
+	hasVersion := i.version!=""
 	installPackage := i.packageName + "@" + i.version
+
+	if log.IsDebug() {
+		log.Debug("check dependency, install:", installPackage, "dependencies[spm.json]:", fmt.Sprintf("%+v",content.Dependencies))
+	}
 	for _, dependency := range content.Dependencies {
-		if dependency==installPackage {
+		if hasVersion {
+			if dependency==installPackage {
+				return errors.New("the package installed")
+			}
+		}
+		if strings.HasPrefix(dependency, installPackage) {
 			return errors.New("the package installed")
 		}
 	}

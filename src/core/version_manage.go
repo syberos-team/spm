@@ -10,11 +10,6 @@ import (
 //当前版本号
 const VERSION = "1.0.0"
 
-
-type CheckVersionResponse struct {
-	version string
-}
-
 //Version 版本号
 type Version struct {
 	//主版本号
@@ -29,20 +24,30 @@ func (v *Version) String() string{
 	return fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Revision)
 }
 
+
+//Version 版本号
+type VersionManage struct {
+	Version
+	//最新的版本号
+	lastVersion Version
+}
+
 //CheckVersion 检查是否有新版本，存在新版本返回true，否则返回false
-func (v *Version) CheckVersion() (bool, error){
-	var data interface{}
-	data = &CheckVersionResponse{}
-	err := Get(API_CHECK_VERSION + "?version=" + v.String(), &data)
-	if err != nil {
+func (v *VersionManage) CheckVersion() (bool, error){
+	client := NewSpmClient()
+	rsp, err := client.LastVersion()
+	if err!=nil {
 		return false, err
 	}
-	respData := data.(CheckVersionResponse)
+	if rsp.Code!=CODE_SUCCESS {
+		return false, errors.New(rsp.Msg)
+	}
 
-	remoteVersion, err := Parse(respData.version)
+	remoteVersion, err := ParseVersion(rsp.Data.Version)
 	if err !=nil {
 		return false, err
 	}
+
 	if remoteVersion.Major < v.Major {
 		return false, nil
 	}
@@ -64,13 +69,16 @@ func (v *Version) CheckVersion() (bool, error){
 	return false, nil
 }
 
-func Upgrade() error{
-	return nil
+func (v *VersionManage) Upgrade() error{
+
+
+	client := NewSpmClient()
+	return client.DownloadSpm(v.lastVersion.String(), nil)
 }
 
 
-//Parse 解析版本号字符串
-func Parse(ver string) (*Version, error){
+//ParseVersion 解析版本号字符串
+func ParseVersion(ver string) (*Version, error){
 	verNums := strings.Split(ver, ".")
 	if verNums==nil || len(verNums) != 3 {
 		return nil, errors.New("version number format error")
@@ -88,6 +96,11 @@ func Parse(ver string) (*Version, error){
 		return nil, err
 	}
 	return &Version{major, minor, revision}, nil
+}
+
+func NewVersionManage() VersionManage{
+	v, _ := ParseVersion(VERSION)
+	return VersionManage{Version:*v}
 }
 
 

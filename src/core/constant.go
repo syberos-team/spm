@@ -5,8 +5,8 @@ const (
 )
 
 const (
-	//检查新版本接口
-	API_CHECK_VERSION string = ""
+	//查询新版本接口
+	API_LAST_VERSION string = ""
 	//下载spm接口
 	API_DOWNLOAD_SPM string = ""
 	//推送接口

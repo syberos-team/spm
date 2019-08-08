@@ -95,7 +95,7 @@ func (i *InitCommand) check() error{
 
 func (i *InitCommand) generateBoilerplate() error{
 	subDir := strings.ReplaceAll(i.spmJson.Name, ".", "/")
-	prefixName := filepath.Base(i.spmJson.PriFilename)
+	prefixName := strings.TrimRight(i.spmJson.PriFilename, ".pri")
 	model := &util.TemplateModel{
 		QrcFile:   prefixName + ".qrc",
 		QrcPrefix:  subDir,

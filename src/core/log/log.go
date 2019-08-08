@@ -67,3 +67,19 @@ func Error(msg ...string){
 		log.Println(msg)
 	}
 }
+
+func IsDebug() bool{
+	return logLevel == LogDebug
+}
+
+func IsInfo() bool{
+	return logLevel == LogInfo
+}
+
+func IsWarning() bool{
+	return logLevel == LogWarn
+}
+
+func IsError() bool{
+	return logLevel == LogError
+}

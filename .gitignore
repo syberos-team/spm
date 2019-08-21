@@ -1,4 +1,5 @@
 .idea
 bin
 spm
-src/golang.org/**/.git
+main
+go.sum

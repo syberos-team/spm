@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"reflect"
 	"spm/core/conf"
 	"spm/core/util"
 	"strings"
@@ -27,42 +28,35 @@ type spmClient struct {
 func (s *spmClient) Publish(req *PublishRequest) (*PublishResponse, error){
 	rsp := &PublishResponse{}
 	var result interface{} = rsp
-
-	var params interface{} = req
-	err := s.sendPost(s.getUrl(API_PUBLISH), &params, &result)
+	err := s.sendPost(s.getUrl(conf.ApiPublish), req, &result)
 	return rsp, err
 }
 
 func (s *spmClient) GetDependency(req *DependencyRequest) (*DependencyResponse, error) {
 	rsp := &DependencyResponse{}
 	var result interface{} = rsp
-	var params interface{} = req
-	err := s.sendGet(s.getUrl(API_GET_DEPENDENCY), &params, &result)
+	err := s.sendGet(s.getUrl(conf.ApiGetDependency), req, &result)
 	return rsp, err
 }
 
 func (s *spmClient) Search(req *SearchRequest) (*SearchResponse, error) {
 	rsp := &SearchResponse{}
 	var result interface{} = rsp
-
-	var params interface{} = req
-	err := s.sendPost(s.getUrl(API_SEARCH), &params, &result)
+	err := s.sendGet(s.getUrl(conf.ApiSearch), req, &result)
 	return rsp, err
 }
 
 func (s *spmClient) Info(req *InfoRequest) (*InfoResponse, error) {
 	rsp := &InfoResponse{}
 	var result interface{} = rsp
-
-	var params interface{} = req
-	err := s.sendPost(s.getUrl(API_INFO), &params, &result)
+	err := s.sendGet(s.getUrl(conf.ApiInfo), req, &result)
 	return rsp, err
 }
 
 func (s *spmClient) LastVersion() (*LastVersionResponse, error){
 	rsp := &LastVersionResponse{}
 	var result interface{} = rsp
-	err := s.sendGet(s.getUrl(API_LAST_VERSION), nil , &result)
+	err := s.sendGet(s.getUrl(conf.ApiLastVersion), nil , &result)
 	return rsp, err
 }
 
@@ -71,7 +65,7 @@ func (s *spmClient) DownloadSpm(version string, w *io.Writer) error {
 		Version: version,
 	}
 	var params interface{} = req
-	_, err := GetDownload(s.getUrlWithParams(API_DOWNLOAD_SPM, &params), w)
+	_, err := GetDownload(s.getUrlWithParams(conf.ApiDownloadSpm, &params), w)
 	if err!=nil {
 		return err
 	}
@@ -112,12 +106,34 @@ func (s *spmClient) sendPost(url string, params interface{}, result *interface{}
 	return PostJSON(url, string(data), result)
 }
 
-func (s *spmClient) sendGet(url string, params *interface{}, result *interface{}) error{
+//发送get请求，注意参数params必须是一个结构体
+func (s *spmClient) sendGet(url string, params interface{}, result *interface{}) error{
 	if params==nil {
-		return Get(url, result)
+		return GetJSON(url, result)
 	}
 
-	return Get(url, result)
+	paramsValue := reflect.ValueOf(params)
+	if paramsValue.Kind()==reflect.Ptr {
+		paramsValue = paramsValue.Elem()
+	}
+	paramsType := paramsValue.Type()
+
+	builder := strings.Builder{}
+
+	for i := 0; i<paramsType.NumField(); i++ {
+		fieldTag := paramsType.Field(i).Tag
+		name := fieldTag.Get("form")
+		if name=="" {
+			name = fieldTag.Get("json")
+		}
+		value := paramsValue.Field(i).String()
+		builder.WriteString(name)
+		builder.WriteString("=")
+		builder.WriteString(value)
+		builder.WriteString("&")
+	}
+	urlParams := builder.String()[: builder.Len()-1]
+	return GetJSON(url + "?" + urlParams, result)
 }
 
 //NewSpmClient 创建一个新的SpmClient客户端

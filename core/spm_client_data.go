@@ -95,7 +95,7 @@ type InfoRequest struct {
 type InfoResponse struct {
 	BaseResponse
 	//返回数据
-	Data InfoResponseData	`json:"data"`
+	Data *InfoResponseData	`json:"data"`
 }
 //InfoResponseData 详情接口返回数据
 type InfoResponseData struct {

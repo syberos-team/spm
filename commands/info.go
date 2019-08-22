@@ -41,6 +41,9 @@ func (i *InfoCommand) Run() error {
 	if err!=nil {
 		return err
 	}
+	if data==nil {
+		return errors.New("no package found")
+	}
 	return i.printData(*data)
 }
 
@@ -69,7 +72,7 @@ func PackageInfo(packageName, version string) (*core.InfoResponseData, error){
 	if core.CODE_ERROR==resp.Code {
 		return nil, errors.New(resp.Msg)
 	}
-	return &resp.Data, nil
+	return resp.Data, nil
 }
 
 func NewInfoCommand() *InfoCommand{

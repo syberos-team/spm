@@ -27,7 +27,7 @@ func getJson(rsp *http.Response, data *interface{}) error{
 	return nil
 }
 
-func Get(url string, data *interface{}) error {
+func GetJSON(url string, data *interface{}) error {
 	log.Debug("request get:", url)
 	resp, err := http.Get(url)
 	if err != nil {

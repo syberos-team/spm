@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"log"
 	"strings"
 )
@@ -20,7 +21,7 @@ const (
 )
 
 //日志级别
-var logLevel = LogInfo
+var logLevel = LogWarn
 
 func SetLogLevel(lv int){
 	logLevel = lv
@@ -56,15 +57,17 @@ func Info(msg ...string){
 
 func Warning(msg ...string){
 	if logLevel <= LogWarn {
-		log.SetPrefix("WARN  | ")
-		log.Println(msg)
+		//log.SetPrefix("WARN  | ")
+		//log.Println(msg)
+		fmt.Println(msg)
 	}
 }
 
 func Error(msg ...string){
 	if logLevel <= LogError {
-		log.SetPrefix("ERROR | ")
-		log.Println(msg)
+		//log.SetPrefix("ERROR | ")
+		//log.Println(msg)
+		fmt.Println(msg)
 	}
 }
 

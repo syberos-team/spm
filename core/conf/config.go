@@ -11,7 +11,6 @@ import (
 const (
 	ConfigDir string = ".spm"
 	ConfigFilename string = "spm.conf"
-	ServerUrl string = "http://www.baidu.com"
 )
 
 var Config configInfo

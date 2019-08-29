@@ -2,11 +2,9 @@ package core
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
+	"errors"
 	"reflect"
 	"spm/core/conf"
-	"spm/core/util"
 	"strings"
 )
 
@@ -16,8 +14,8 @@ type SpmClient interface {
 	GetDependency(req *DependencyRequest) (*DependencyResponse, error)
 	Search(req *SearchRequest) (*SearchResponse, error)
 	Info(req *InfoRequest) (*InfoResponse, error)
-	LastVersion() (*LastVersionResponse, error)
-	DownloadSpm(version string, w *io.Writer) error
+	LastVersion(version string) (*LastVersionResponse, error)
+	DownloadSpm(version string) ([]byte, error)
 }
 
 //spmClient spm客户端结构体
@@ -53,23 +51,34 @@ func (s *spmClient) Info(req *InfoRequest) (*InfoResponse, error) {
 	return rsp, err
 }
 
-func (s *spmClient) LastVersion() (*LastVersionResponse, error){
+func (s *spmClient) LastVersion(version string) (*LastVersionResponse, error){
 	rsp := &LastVersionResponse{}
 	var result interface{} = rsp
-	err := s.sendGet(s.getUrl(conf.ApiLastVersion), nil , &result)
+
+	req := &LastVersionRequest{Version:version}
+	err := s.sendGet(s.getUrl(conf.ApiLastVersion), req, &result)
 	return rsp, err
 }
 
-func (s *spmClient) DownloadSpm(version string, w *io.Writer) error {
+func (s *spmClient) DownloadSpm(version string) ([]byte, error) {
 	req := &DownloadSpmRequest{
 		Version: version,
 	}
-	var params interface{} = req
-	_, err := GetDownload(s.getUrlWithParams(conf.ApiDownloadSpm, &params), w)
+	header, data, err := GetDownload(s.getUrlWithParams(conf.ApiDownloadSpm, req))
 	if err!=nil {
-		return err
+		return nil, err
 	}
-	return nil
+	contentType := header.Get("Content-Type")
+	if strings.Contains(contentType, "application/json"){
+		rsp := &BaseResponse{}
+		err = json.Unmarshal(data, rsp)
+		if err!=nil {
+			return nil, err
+		}
+		return nil, errors.New(rsp.Msg)
+	}
+
+	return data, nil
 }
 
 //getUrl 拼接url
@@ -82,20 +91,32 @@ func (s *spmClient) getUrl(path string) string{
 }
 
 func (s *spmClient) getUrlWithParams(path string, params interface{}) string{
-	url := s.getUrl(path)
 	if params==nil {
-		return url
+		return s.getUrl(path)
 	}
-	builder := &strings.Builder{}
-	builder.WriteString(url)
-	args := util.Struct2Map(params)
-	if len(*args) > 0 {
-		builder.WriteString("?")
+
+	paramsValue := reflect.ValueOf(params)
+	if paramsValue.Kind()==reflect.Ptr {
+		paramsValue = paramsValue.Elem()
 	}
-	for k,v := range *args {
-		builder.WriteString(fmt.Sprintf("%s=%v&", k, v))
+	paramsType := paramsValue.Type()
+
+	builder := strings.Builder{}
+
+	for i := 0; i<paramsType.NumField(); i++ {
+		fieldTag := paramsType.Field(i).Tag
+		name := fieldTag.Get("form")
+		if name=="" {
+			name = fieldTag.Get("json")
+		}
+		value := paramsValue.Field(i).String()
+		builder.WriteString(name)
+		builder.WriteString("=")
+		builder.WriteString(value)
+		builder.WriteString("&")
 	}
-	return builder.String()[:builder.Len()-1]
+	urlParams := builder.String()[: builder.Len()-1]
+	return s.getUrl(path) + "?" + urlParams
 }
 
 func (s *spmClient) sendPost(url string, params interface{}, result *interface{}) error{

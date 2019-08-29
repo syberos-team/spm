@@ -8,9 +8,9 @@ const (
 	ServerUrl string = "http://127.0.0.1:8000"
 
 	//查询新版本接口
-	ApiLastVersion string = ""
+	ApiLastVersion string = "/upgrade"
 	//下载spm接口
-	ApiDownloadSpm string = ""
+	ApiDownloadSpm string = "/download"
 	//推送接口
 	ApiPublish string = "/publish"
 	//下载依赖接口

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"spm/commands"
+	"spm/core/conf"
 	_ "spm/core/conf"
 	"spm/reg"
 )
@@ -10,6 +11,9 @@ import (
 var registry *reg.Registry
 
 func init(){
+	conf.InitConfig()
+	commands.InitPwd()
+
 	registry = reg.NewRegistry()
 
 	registry.RegistryCommand("help", commands.NewHelpCommand())

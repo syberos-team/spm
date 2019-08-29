@@ -3,8 +3,13 @@ package core
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path"
+	"spm/core/conf"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
 //当前版本号
@@ -28,14 +33,14 @@ func (v *Version) String() string{
 //Version 版本号
 type VersionManage struct {
 	Version
-	//最新的版本号
+	//最新的版本号，需要更新时此处存在
 	lastVersion Version
 }
 
 //CheckVersion 检查是否有新版本，存在新版本返回true，否则返回false
 func (v *VersionManage) CheckVersion() (bool, error){
 	client := NewSpmClient()
-	rsp, err := client.LastVersion()
+	rsp, err := client.LastVersion(VERSION)
 	if err!=nil {
 		return false, err
 	}
@@ -52,30 +57,49 @@ func (v *VersionManage) CheckVersion() (bool, error){
 		return false, nil
 	}
 	if remoteVersion.Major > v.Major {
+		v.lastVersion = *remoteVersion
 		return true, nil
 	}
 	if remoteVersion.Minor < v.Minor {
 		return false, nil
 	}
 	if remoteVersion.Minor > v.Minor {
+		v.lastVersion = *remoteVersion
 		return true, nil
 	}
 	if remoteVersion.Revision < v.Revision {
 		return false, nil
 	}
 	if remoteVersion.Revision > v.Revision {
+		v.lastVersion = *remoteVersion
 		return true, nil
 	}
 	return false, nil
 }
 
 func (v *VersionManage) Upgrade() error{
-
-
 	client := NewSpmClient()
-	return client.DownloadSpm(v.lastVersion.String(), nil)
-}
 
+	filename := conf.FILENAME + ".tmp"
+	filePath := path.Join(conf.Config.GetConfigDir(), filename)
+	data, err := client.DownloadSpm(v.lastVersion.String())
+	if err!=nil {
+		return err
+	}
+	if err = ioutil.WriteFile(filePath, data, os.ModePerm); err!=nil {
+		return err
+	}
+	spmPath, err := os.Executable()
+	if err!=nil {
+		return err
+	}
+	args := []string{filename, "copy", filePath, spmPath}
+	env := os.Environ()
+	if err = syscall.Exec(filePath, args, env); err!=nil {
+		panic(err)
+	}
+	return nil
+}
 
 //ParseVersion 解析版本号字符串
 func ParseVersion(ver string) (*Version, error){
@@ -91,7 +115,7 @@ func ParseVersion(ver string) (*Version, error){
 	if err!=nil {
 		return nil, err
 	}
-	revision, err := strconv.Atoi(verNums[1])
+	revision, err := strconv.Atoi(verNums[2])
 	if err!=nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"spm/commands"
 	"spm/core/log"
+	"spm/core/util"
 )
 
 type Registry struct {
@@ -24,6 +25,9 @@ func (r *Registry) RegistryCommand(name string, commander commands.Commander){
 }
 
 func (r *Registry) RunCommand(){
+	if r.runCopy() {
+		return
+	}
 	for name, run := range r.commandRun {
 		if *run {
 			cmd := r.commandImpl[name]
@@ -37,6 +41,19 @@ func (r *Registry) RunCommand(){
 		}
 	}
 	commands.Usage()
+}
+
+func (r *Registry) runCopy() bool{
+	if len(os.Args) == 4 && os.Args[1]=="copy" {
+		src := os.Args[2]
+		dst := os.Args[3]
+		_, err := util.CopyFile(src, dst)
+		if err!=nil {
+			log.Error(err.Error())
+		}
+		return true
+	}
+	return false
 }
 
 func NewRegistry() *Registry{

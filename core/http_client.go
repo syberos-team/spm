@@ -2,7 +2,6 @@ package core
 
 import (
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"spm/core/log"
@@ -48,23 +47,14 @@ func PostJSON(url, params string, data *interface{}) error{
 }
 
 
-func GetDownload(url string, writer *io.Writer) (size int64, err error){
+func GetDownload(url string) (header *http.Header, data []byte, err error){
+	log.Debug("request get:", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return
 	}
+	header = &resp.Header
 	defer util.CloseQuietly(resp.Body)
-	size, err = io.Copy(*writer, resp.Body)
+	data, err = ioutil.ReadAll(resp.Body)
 	return
 }
-
-func PostDownload(url string, params *map[string][]string, writer *io.Writer) (size int64, err error){
-	resp, err := http.PostForm(url, *params)
-	if err != nil {
-		return
-	}
-	defer util.CloseQuietly(resp.Body)
-	size, err = io.Copy(*writer, resp.Body)
-	return
-}
-

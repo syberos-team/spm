@@ -9,7 +9,7 @@ const SpmJsonFilename = "spm.json"
 //pwd 当前所在目录
 var pwd string
 
-func init(){
+func InitPwd(){
 	path, err := util.Pwd()
 	if err!=nil {
 		panic(err)

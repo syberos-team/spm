@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"io"
 	"os"
 )
@@ -28,4 +29,35 @@ func Pwd() (string, error){
 	}else{
 		return cwd, err
 	}
+}
+
+
+func CopyFile(src, dst string) (int64, error){
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer CloseQuietly(source)
+
+	var destination *os.File
+	if IsExists(dst) {
+		destination, err = os.OpenFile(dst, os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+		if err!=nil {
+			return 0, err
+		}
+	}else {
+		destination, err = os.Create(dst)
+		if err!=nil {
+			return 0, err
+		}
+	}
+	defer CloseQuietly(destination)
+	return io.Copy(destination, source)
 }

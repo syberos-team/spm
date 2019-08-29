@@ -15,7 +15,7 @@ const (
 
 var Config configInfo
 
-func init(){
+func InitConfig(){
 	Config = configInfo{
 		Url: ServerUrl,
 		Log: logInfo{
@@ -40,10 +40,16 @@ type configInfo struct {
 	//日志
 	Log logInfo `json:"log"`
 
+	configDir string		//配置文件所在目录
 	configFilePath string	//配置文件所在路径
 }
 
-//load 尝试从用户目录下加载spm.conf文件，若文件不存在，将会尝试创建，并使用默认配置
+//GetConfigDir 获取配置文件所在目录
+func (c *configInfo) GetConfigDir() string{
+	return c.configDir
+}
+
+//load 尝试从用户目录下加载.spm/spm.conf文件，若文件不存在，将会尝试创建，并使用默认配置
 func (c *configInfo) load(){
 	configFilePath, err := c.spmPath(ConfigFilename)
 	c.configFilePath = configFilePath
@@ -76,10 +82,11 @@ func (c *configInfo) spmPath(sub ...string) (string, error){
 	if err != nil {
 		return "", err
 	}
+	c.configDir = path.Join(usr.HomeDir, ConfigDir)
 	if sub==nil {
-		return path.Join(usr.HomeDir, ConfigDir), nil
+		return c.configDir, nil
 	} else {
-		dirs := []string{usr.HomeDir, ConfigDir}
+		dirs := []string{c.configDir}
 		dirs = append(dirs, sub...)
 		return 	path.Join(dirs...), nil
 	}

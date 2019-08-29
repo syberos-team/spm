@@ -107,6 +107,10 @@ type InfoResponseData struct {
 	PriFilename	string 	`json:"priFilename"`
 }
 
+type LastVersionRequest struct {
+	Version string `json:"version"`
+}
+
 //LastVersionRequest 查询新版本
 type LastVersionResponse struct {
 	BaseResponse

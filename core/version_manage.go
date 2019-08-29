@@ -78,6 +78,7 @@ func (v *VersionManage) CheckVersion() (bool, error){
 }
 
 func (v *VersionManage) Upgrade() error{
+	fmt.Println("Ready to update to", v.lastVersion.String())
 	client := NewSpmClient()
 
 	filename := conf.FILENAME + ".tmp"

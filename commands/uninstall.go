@@ -20,11 +20,20 @@ func (u *UninstallCommand) Run() error {
 }
 
 func (u *UninstallCommand) RegisterArgs(args ...string) {
-	if args==nil || len(args)==0 {
-		return
-	}
 	u.packageName = strings.TrimSpace(args[0])
 }
+
+func (u *UninstallCommand) ArgsDescription() []ArgsDescription{
+	return []ArgsDescription{
+		{
+			Name:        "package",
+			Description: "Package name to be uninstalled",
+			Required:    true,
+			IsArray:     false,
+		},
+	}
+}
+
 
 func NewUninstallCommand() *UninstallCommand{
 	return &UninstallCommand{}

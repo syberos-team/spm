@@ -23,6 +23,10 @@ func (i *InitCommand) Description() string {
 	return "Initializes a new module in the current directory"
 }
 
+func (i *InitCommand) ArgsDescription() []ArgsDescription{
+	return nil
+}
+
 func (i *InitCommand) Run() error {
 	if err := i.check(); err!=nil {
 		return err

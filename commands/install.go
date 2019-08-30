@@ -94,10 +94,18 @@ func (i *InstallCommand) Run() error {
 }
 
 func (i *InstallCommand) RegisterArgs(args ...string) {
-	if args==nil || len(args)==0 {
-		return
-	}
 	i.packageName, i.version = util.ParsePackageInfo(args[0])
+}
+
+func (i *InstallCommand) ArgsDescription() []ArgsDescription{
+	return []ArgsDescription{
+		{
+			Name:        "package",
+			Description: "The package name can be attached with a version number, such as com.syber.test@1.0.0",
+			Required:    true,
+			IsArray:     false,
+		},
+	}
 }
 
 func (i *InstallCommand) downloadFromGit(url, path string) error{

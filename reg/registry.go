@@ -1,52 +1,47 @@
 package reg
 
 import (
-	"flag"
-	"os"
+	"github.com/gookit/gcli/v2"
 	"spm/commands"
+	"spm/core"
+	"spm/core/conf"
 	"spm/core/log"
 	"spm/core/util"
 )
 
 type Registry struct {
-	//存储指令的实现，key指令，value为实现
-	commandImpl map[string]commands.Commander
-	//存储指令是否执行，key指令，value为是否执行
-	commandRun map[string]*bool
+	app *gcli.App
 }
 
 
 func (r *Registry) RegistryCommand(name string, commander commands.Commander){
-	var value = false
-	flag.BoolVar(&value, name, false, commander.Description())
-
-	r.commandImpl[name] = commander
-	r.commandRun[name] = &value
+	cmd := gcli.NewCommand(name, commander.Description(), nil)
+	argsDescription := commander.ArgsDescription()
+	if argsDescription!=nil {
+		for _, desc := range argsDescription {
+			cmd.AddArg(desc.Name, desc.Description, desc.Required, desc.IsArray)
+		}
+	}
+	cmd.SetFunc(func(c *gcli.Command, args []string) error{
+		commander.RegisterArgs(args...)
+		return commander.Run()
+	})
+	r.app.Add(cmd)
 }
 
 func (r *Registry) RunCommand(){
 	if r.runCopy() {
 		return
 	}
-	for name, run := range r.commandRun {
-		if *run {
-			cmd := r.commandImpl[name]
-			cmd.RegisterArgs(os.Args[2:]...)
-			err := cmd.Run()
-			if err!=nil {
-				log.Error(err.Error())
-				os.Exit(1)
-			}
-			os.Exit(0)
-		}
-	}
-	commands.Usage()
+	r.app.Run()
 }
 
 func (r *Registry) runCopy() bool{
-	if len(os.Args) == 4 && os.Args[1]=="copy" {
-		src := os.Args[2]
-		dst := os.Args[3]
+	args := r.app.OsArgs()
+	if len(args) == 4 && args[1]=="copy" {
+		src := args[2]
+		dst := args[3]
+		log.Debug("copy", src, dst)
 		_, err := util.CopyFile(src, dst)
 		if err!=nil {
 			log.Error(err.Error())
@@ -57,8 +52,11 @@ func (r *Registry) runCopy() bool{
 }
 
 func NewRegistry() *Registry{
+	app := gcli.NewApp()
+	app.Name = conf.FILENAME
+	app.Version = core.VERSION
+	app.Description = "spm is a tool for managing syberos app dependencies"
 	return &Registry{
-		commandImpl: map[string]commands.Commander{},
-		commandRun: map[string]*bool{},
+		app: app,
 	}
 }

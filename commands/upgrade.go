@@ -30,6 +30,10 @@ func (u *UpgradeCommand) Run() error {
 func (u *UpgradeCommand) RegisterArgs(args ...string) {
 }
 
+func (u *UpgradeCommand) ArgsDescription() []ArgsDescription{
+	return nil
+}
+
 func NewUpgradeCommand() *UpgradeCommand {
 	return &UpgradeCommand{}
 }

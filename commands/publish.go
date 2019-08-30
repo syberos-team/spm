@@ -25,6 +25,17 @@ func (p *PublishCommand) RegisterArgs(args ...string) {
 	}
 }
 
+func (p *PublishCommand) ArgsDescription() []ArgsDescription{
+	return []ArgsDescription{
+		{
+			Name:        "force",
+			Description: "Forced update package(Optional)",
+			Required:    false,
+			IsArray:     false,
+		},
+	}
+}
+
 func (p *PublishCommand) Description() string {
 	return "Publishes a new module"
 }

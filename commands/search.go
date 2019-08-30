@@ -17,10 +17,18 @@ type SearchCommand struct {
 }
 
 func (s *SearchCommand) RegisterArgs(args ...string) {
-	if args==nil || len(args)==0 {
-		return
-	}
 	s.packageName = args[0]
+}
+
+func (s *SearchCommand) ArgsDescription() []ArgsDescription{
+	return []ArgsDescription{
+		{
+			Name:        "keyword",
+			Description: "The package name keyword to be searched",
+			Required:    true,
+			IsArray:     false,
+		},
+	}
 }
 
 func (s *SearchCommand) Description() string {

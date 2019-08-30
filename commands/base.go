@@ -25,6 +25,14 @@ type Commander interface {
 	Description() string
 	Run() error
 	RegisterArgs(args ...string)
+	ArgsDescription() []ArgsDescription
+}
+
+type ArgsDescription struct {
+	Name string
+	Description string
+	Required bool
+	IsArray bool
 }
 
 

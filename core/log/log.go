@@ -1,8 +1,8 @@
 package log
 
 import (
-	"fmt"
-	"log"
+	"github.com/gookit/color"
+	"spm/core/util"
 	"strings"
 )
 
@@ -41,33 +41,27 @@ func SetLogLevelString(lv string) {
 	}
 }
 
-func Debug(msg ...string){
+func Debug(msg ...interface{}){
 	if logLevel <= LogDebug {
-		log.SetPrefix("DEBUG | ")
-		log.Println(msg)
+		color.Gray.Println(util.SlicePrepend(msg, "DEBUG | "))
 	}
 }
 
-func Info(msg ...string){
+func Info(msg ...interface{}){
 	if logLevel <= LogInfo {
-		log.SetPrefix("INFO  | ")
-		log.Println(msg)
+		color.Info.Println(msg...)
 	}
 }
 
-func Warning(msg ...string){
+func Warning(msg ...interface{}){
 	if logLevel <= LogWarn {
-		//log.SetPrefix("WARN  | ")
-		//log.Println(msg)
-		fmt.Println(msg)
+		color.Warn.Println(msg...)
 	}
 }
 
-func Error(msg ...string){
+func Error(msg ...interface{}){
 	if logLevel <= LogError {
-		//log.SetPrefix("ERROR | ")
-		//log.Println(msg)
-		fmt.Println(msg)
+		color.Danger.Println(msg...)
 	}
 }
 

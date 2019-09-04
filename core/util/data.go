@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"github.com/gookit/color"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -36,9 +36,9 @@ func Struct2Map(t interface{}) *map[string]interface{}{
 func Prompt(prompt string, defaultValue string) chan string{
 	replyChannel := make(chan string, 1)
 	if defaultValue == "" {
-		fmt.Print(prompt, " ")
+		color.Cyan.Print(prompt, " ")
 	}else{
-		fmt.Printf("%s [%s] ", prompt, defaultValue)
+		color.Printf("<cyan>%s</> <gray>[%s]</> ", prompt, defaultValue)
 	}
 	in := bufio.NewReader(os.Stdin)
 	answer, _ := in.ReadString('\n')

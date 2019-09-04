@@ -24,7 +24,11 @@ func (r *Registry) RegistryCommand(name string, commander commands.Commander){
 	}
 	cmd.SetFunc(func(c *gcli.Command, args []string) error{
 		commander.RegisterArgs(args...)
-		return commander.Run()
+		err := commander.Run()
+		if err!=nil {
+			log.Error(err)
+		}
+		return nil
 	})
 	r.app.Add(cmd)
 }

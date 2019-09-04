@@ -82,7 +82,7 @@ func (s *SearchCommand) printData(results []*core.SearchResponseData) {
 	}
 	width, _, err := terminal.GetSize(int(syscall.Stdout))
 	if err != nil {
-		fmt.Printf("Couldn't get terminal width: %s\n", err.Error())
+		log.Warning(fmt.Sprintf("Couldn't get terminal width: %s\n", err.Error()))
 		// gracefully fallback to something sensible
 		width = 110
 	}

@@ -59,7 +59,7 @@ func ToPrettyJSON(v interface{}) ([]byte, error){
 }
 
 //LoadJsonFile 加载json文件内容转成struct
-func LoadJsonFile(filePath string, data *interface{}) error{
+func LoadJsonFile(filePath string, data interface{}) error{
 	if !IsExists(filePath) {
 		return errors.New("is not exists: " + filePath)
 	}

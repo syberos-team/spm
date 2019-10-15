@@ -2,7 +2,7 @@ package commands
 
 import (
 	"errors"
-	"os"
+	"fmt"
 	"path/filepath"
 	"spm/core/conf"
 	"spm/core/log"
@@ -14,6 +14,8 @@ import (
 type InitCommand struct {
 	Command
 	spmJson *conf.SpmJson
+	//是否生成样板
+	boilerplate bool
 }
 
 func (i *InitCommand) RegisterArgs(args ...string) {
@@ -28,24 +30,34 @@ func (i *InitCommand) ArgsDescription() []ArgsDescription{
 }
 
 func (i *InitCommand) Run() error {
-	if err := i.check(); err!=nil {
+	if err := i.beforeCheck(); err!=nil {
 		return err
 	}
-	cwd := filepath.Base(pwd)
+	var author string
+	var email string
+	var repoUrl string
+
+	//查询git仓库信息
+	if util.IsGitRepository(pwd) {
+		author, email, repoUrl = i.gitInfo()
+	}
 
 	i.spmJson = conf.NewSpmJson()
+	i.spmJson.Author.Name, _ = <-util.Prompt("Your name:", author)
+	i.spmJson.Author.Email, _ = <-util.Prompt("Your email:", email)
 
-	i.spmJson.Author.Name, _ = <-util.Prompt("Your name:", "")
-	i.spmJson.Author.Email, _ = <-util.Prompt("Your email:", "")
-
+	cwd := filepath.Base(pwd)
 	suggestedName := i.extractReverseDomain(i.spmJson.Author.Email) + "." + cwd
+	if strings.HasPrefix(suggestedName, ".") {
+		suggestedName = suggestedName[1:]
+	}
 	i.spmJson.Name, _ = <-util.Prompt("Unique package name:", suggestedName)
 	if i.spmJson.Name == "" {
 		return errors.New("must be filled in with unique package name")
 	}
 	i.spmJson.Description, _ = <-util.Prompt("Briefly describe the project:", "")
 
-	i.spmJson.Repository.Url, _ = <-util.Prompt("Git repository url:", "")
+	i.spmJson.Repository.Url, _ = <-util.Prompt("Git repository url:", repoUrl)
 	priFilename, _ := <-util.Prompt("Package .pri file:", i.recommendPriFilename(i.spmJson.Name))
 	if priFilename == "" {
 		return errors.New("must be filled in with package .pri file")
@@ -55,11 +67,24 @@ func (i *InitCommand) Run() error {
 	}
 	i.spmJson.PriFilename = priFilename
 
+	bootstrap := <-util.Prompt("Generate boilerplate:", "Y/n")
+	if len(bootstrap) == 0 || strings.ToLower(string(bootstrap[0])) == "y" {
+		i.boilerplate = true
+	}
+
+	//生成文件前再次检查
+	if err := i.afterCheck(); err!=nil {
+		return err
+	}
+
 	if err := i.generateSpmJson(); err!=nil{
 		return err
 	}
-	if err := i.generateBoilerplate(); err!=nil {
-		return err
+
+	if i.boilerplate {
+		if err := i.generateBoilerplate(); err!=nil {
+			return err
+		}
 	}
 	log.Info("Initialized module ", i.spmJson.Name)
 	return nil
@@ -83,16 +108,19 @@ func (i *InitCommand) recommendPriFilename(name string) string{
 	return strings.ReplaceAll(name, ".", "_") + ".pri"
 }
 
-//check 检查当前所在目录必须是空目录
-func (i *InitCommand) check() error{
-	f, err := os.Open(pwd)
-	if err!=nil {
-		return err
+//beforeCheck 检查当前所在目录下没有spm.json
+func (i *InitCommand) beforeCheck() error{
+	spmJsonPath := filepath.Join(pwd, SpmJsonFilename)
+	if util.IsExists(spmJsonPath) {
+		return fmt.Errorf("%s is exists", SpmJsonFilename)
 	}
-	defer util.CloseQuietly(f)
-	dirname, _ := f.Readdirnames(1)
-	if len(dirname) > 0 {
-		return errors.New("current directory is not empty")
+	return nil
+}
+
+func (i *InitCommand) afterCheck() error {
+	priPath := filepath.Join(pwd, i.spmJson.PriFilename)
+	if util.IsExists(priPath) {
+		return fmt.Errorf("%s is exists", i.spmJson.PriFilename)
 	}
 	return nil
 }
@@ -122,6 +150,14 @@ func (i *InitCommand) generateBoilerplate() error{
 
 func (i *InitCommand) generateSpmJson() error{
 	return util.WriteStruct(filepath.Join(pwd, SpmJsonFilename), i.spmJson)
+}
+
+func (i *InitCommand) gitInfo() (author, email, repoUrl string){
+	git := util.NewGit()
+	author, _ = git.LastCommitAuthorName()
+	email, _ = git.LastCommitEmail()
+	repoUrl, _ = git.RepositoryURL()
+	return
 }
 
 func NewInitCommand() *InitCommand{

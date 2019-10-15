@@ -5,7 +5,7 @@ const (
 )
 
 const (
-	ServerUrl string = "http://127.0.0.1:8000"
+	ServerUrl string = "https://spm.syberos.com"
 
 	//查询新版本接口
 	ApiLastVersion string = "/upgrade"

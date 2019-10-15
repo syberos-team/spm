@@ -130,7 +130,7 @@ func (i *InstallCommand) ArgsDescription() []ArgsDescription{
 
 // 安装包，若spm.json不存在则会创建，参数spmJsonContent表示spm.json的内容，故当spm.json不存在时为空
 func (i *InstallCommand) installPackage(spmJsonFilePath, pkgName, pkgVersion string, spmJsonContent *SpmJsonContent, needUpdateSpmJson bool) error{
-	//查询待安装的包信息
+	//通过查询待安装的包信息，infoData由接口返回
 	infoData, err := PackageInfo(pkgName, pkgVersion)
 	if err!=nil {
 		return err
@@ -162,7 +162,7 @@ func (i *InstallCommand) installPackage(spmJsonFilePath, pkgName, pkgVersion str
 		}
 	}
 	//更新vendor.pri
-	err = i.updateVendor(path.Join(vendorDirPath, VendorPri))
+	err = i.updateVendor(infoData.Package.Name, path.Join(vendorDirPath, VendorPri))
 	if err!=nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func (i *InstallCommand) downloadFromGit(url, path string) error{
 	return nil
 }
 
-func (i *InstallCommand) createVendorPriContent(vendorPriPath string) (string, error){
+func (i *InstallCommand) createVendorPriContent(pkgName, vendorPriPath string) (string, error){
 	var oldContent string
 	if util.IsExists(vendorPriPath) {
 		var err error
@@ -194,7 +194,7 @@ func (i *InstallCommand) createVendorPriContent(vendorPriPath string) (string, e
 	var includePris []string
 
 	includeNewPri := "include($$PWD/" +
-		path.Join(i.pkgName2Path(i.packageName), i.priFilename) +
+		path.Join(i.pkgName2Path(pkgName), i.priFilename) +
 		")"
 
 	oldContentBuf := bufio.NewReader(strings.NewReader(oldContent))
@@ -223,8 +223,8 @@ func (i *InstallCommand) createVendorPriContent(vendorPriPath string) (string, e
 }
 
 //updateVendor 更新vendor.pri文件，不存在时会新建，若文件中已存在安装包的pri文件路径时，pri文件仍会重写，但内容不会变化
-func (i *InstallCommand) updateVendor(vendorPriPath string) error{
-	content, err := i.createVendorPriContent(vendorPriPath)
+func (i *InstallCommand) updateVendor(pkgName, vendorPriPath string) error{
+	content, err := i.createVendorPriContent(pkgName, vendorPriPath)
 	if err!=nil {
 		return err
 	}

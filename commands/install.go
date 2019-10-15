@@ -135,6 +135,10 @@ func (i *InstallCommand) installPackage(spmJsonFilePath, pkgName, pkgVersion str
 	if err!=nil {
 		return err
 	}
+	if infoData == nil || infoData.IsEmpty(){
+		log.Debug("no package found: the return data of the service is empty", infoData)
+		return errors.New("no package found")
+	}
 	i.version = infoData.Version
 	i.priFilename = infoData.PriFilename
 	//创建verdor目录

@@ -107,6 +107,11 @@ type InfoResponseData struct {
 	PriFilename	string 	`json:"priFilename"`
 }
 
+func (i *InfoResponseData) IsEmpty() bool{
+	return i.Package.Name == ""
+}
+
+
 type LastVersionRequest struct {
 	Version string `json:"version"`
 }

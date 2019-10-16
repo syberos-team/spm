@@ -55,7 +55,7 @@ func (i *InitCommand) Run() error {
 	if i.spmJson.Name == "" {
 		return errors.New("must be filled in with unique package name")
 	}
-	i.spmJson.Version, _ = <-util.Prompt("package version:", i.spmJson.Version)
+	i.spmJson.Version, _ = <-util.Prompt("Package version:", i.spmJson.Version)
 	if i.spmJson.Version == "" {
 		return errors.New("must be filled in with version")
 	}

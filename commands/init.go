@@ -55,6 +55,10 @@ func (i *InitCommand) Run() error {
 	if i.spmJson.Name == "" {
 		return errors.New("must be filled in with unique package name")
 	}
+	i.spmJson.Version, _ = <-util.Prompt("Package version:", i.spmJson.Version)
+	if i.spmJson.Version == "" {
+		return errors.New("must be filled in with version")
+	}
 	i.spmJson.Description, _ = <-util.Prompt("Briefly describe the project:", "")
 
 	i.spmJson.Repository.Url, _ = <-util.Prompt("Git repository url:", repoUrl)

@@ -12,9 +12,6 @@ import (
 	"syscall"
 )
 
-//当前版本号
-const VERSION = "1.0.0"
-
 //Version 版本号
 type Version struct {
 	//主版本号
@@ -40,7 +37,7 @@ type VersionManage struct {
 //CheckVersion 检查是否有新版本，存在新版本返回true，否则返回false
 func (v *VersionManage) CheckVersion() (bool, error){
 	client := NewSpmClient()
-	rsp, err := client.LastVersion(VERSION)
+	rsp, err := client.LastVersion(conf.VERSION)
 	if err!=nil {
 		return false, err
 	}
@@ -87,7 +84,7 @@ func (v *VersionManage) Upgrade() error{
 	if err!=nil {
 		return err
 	}
-	if err = ioutil.WriteFile(filePath, data, os.ModePerm); err!=nil {
+	if err = ioutil.WriteFile(filePath, data, 0755); err!=nil {
 		return err
 	}
 	spmPath, err := os.Executable()
@@ -124,7 +121,7 @@ func ParseVersion(ver string) (*Version, error){
 }
 
 func NewVersionManage() VersionManage{
-	v, _ := ParseVersion(VERSION)
+	v, _ := ParseVersion(conf.VERSION)
 	return VersionManage{Version:*v}
 }
 

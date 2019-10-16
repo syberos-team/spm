@@ -30,6 +30,7 @@ func (s *SpmJson) Load(filePath string) error{
 	return util.LoadJsonFile(filePath, &data)
 }
 
+// 创建SpmJson对象，设置version为0.0.1
 func NewSpmJson() *SpmJson{
 	return &SpmJson{
 		Version: "0.0.1",

@@ -3,7 +3,6 @@ package reg
 import (
 	"github.com/gookit/gcli/v2"
 	"spm/commands"
-	"spm/core"
 	"spm/core/conf"
 	"spm/core/log"
 	"spm/core/util"
@@ -58,7 +57,7 @@ func (r *Registry) runCopy() bool{
 func NewRegistry() *Registry{
 	app := gcli.NewApp()
 	app.Name = conf.FILENAME
-	app.Version = core.VERSION
+	app.Version = conf.VERSION
 	app.Description = "spm is a tool for managing syberos app dependencies"
 	return &Registry{
 		app: app,

@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"spm/core"
+	"spm/core/conf"
 )
 
 type UpgradeCommand struct {
@@ -22,7 +23,7 @@ func (u *UpgradeCommand) Run() error {
 	if needUpgrade {
 		return versionManage.Upgrade()
 	}
-	fmt.Println("version:", core.VERSION)
+	fmt.Println("version:", conf.VERSION)
 	fmt.Println("The current version is up to date")
 	return nil
 }

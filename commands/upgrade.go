@@ -23,7 +23,7 @@ func (u *UpgradeCommand) Run() error {
 	if needUpgrade {
 		return versionManage.Upgrade()
 	}
-	fmt.Println("version:", conf.VERSION)
+	fmt.Println("version:", conf.Config.GetVersion())
 	fmt.Println("The current version is up to date")
 	return nil
 }

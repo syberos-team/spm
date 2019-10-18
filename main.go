@@ -7,10 +7,13 @@ import (
 	"spm/reg"
 )
 
+// spm 版本号，spm版本升级时在此处修改版本号
+const VERSION = "1.0.0"
+
 var registry *reg.Registry
 
 func init(){
-	conf.InitConfig()
+	conf.InitConfig(VERSION)
 	commands.InitPwd()
 
 	registry = reg.NewRegistry()

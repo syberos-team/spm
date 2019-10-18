@@ -15,12 +15,13 @@ const (
 
 var Config configInfo
 
-func InitConfig(){
+func InitConfig(version string){
 	Config = configInfo{
 		Url: ServerUrl,
 		Log: logInfo{
 			Level:log.LogInfoString,
 		},
+		version:version,
 	}
 	Config.load()
 	//设置日志级别
@@ -42,6 +43,13 @@ type configInfo struct {
 
 	configDir string		//配置文件所在目录
 	configFilePath string	//配置文件所在路径
+	//spm工具版本号
+	version string
+}
+
+// 获取spm工具版本号
+func (c *configInfo) GetVersion() string{
+	return c.version
 }
 
 //GetConfigDir 获取配置文件所在目录

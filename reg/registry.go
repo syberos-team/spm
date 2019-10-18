@@ -39,6 +39,7 @@ func (r *Registry) RunCommand(){
 	r.app.Run()
 }
 
+// 内部命令（copy）spm升级时调用
 func (r *Registry) runCopy() bool{
 	args := r.app.OsArgs()
 	if len(args) == 4 && args[1]=="copy" {
@@ -57,7 +58,7 @@ func (r *Registry) runCopy() bool{
 func NewRegistry() *Registry{
 	app := gcli.NewApp()
 	app.Name = conf.FILENAME
-	app.Version = conf.VERSION
+	app.Version = conf.Config.GetVersion()
 	app.Description = "spm is a tool for managing syberos app dependencies"
 	return &Registry{
 		app: app,

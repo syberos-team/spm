@@ -2,8 +2,6 @@ package conf
 
 const (
 	FILENAME string = "spm"
-	//当前版本号
-	VERSION = "1.0.0"
 )
 
 const (

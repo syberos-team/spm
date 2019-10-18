@@ -37,7 +37,7 @@ type VersionManage struct {
 //CheckVersion 检查是否有新版本，存在新版本返回true，否则返回false
 func (v *VersionManage) CheckVersion() (bool, error){
 	client := NewSpmClient()
-	rsp, err := client.LastVersion(conf.VERSION)
+	rsp, err := client.LastVersion(conf.Config.GetVersion())
 	if err!=nil {
 		return false, err
 	}
@@ -121,7 +121,7 @@ func ParseVersion(ver string) (*Version, error){
 }
 
 func NewVersionManage() VersionManage{
-	v, _ := ParseVersion(conf.VERSION)
+	v, _ := ParseVersion(conf.Config.GetVersion())
 	return VersionManage{Version:*v}
 }
 
